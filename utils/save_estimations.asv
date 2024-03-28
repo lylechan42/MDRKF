@@ -1,0 +1,32 @@
+function save_estimations(method, n_sample, alpha, MSE_MDRO_Z, MSE_CI)
+% Save MSE estimations based on the method, sample size, and alpha value
+
+% Check if static_estimation.mat exists, if not, create an empty file
+filename = 'static_estimation.mat';
+if ~exist(filename, 'file')
+    save(filename); % Creates an empty .mat file
+end
+
+% Format alpha to match the naming convention (e.g., 0.8 -> 080)
+formatted_alpha = sprintf('%03d', alpha * 100);
+
+% Determine the method prefix for the variable names
+if strcmp(method, 'kl_divergence')
+    method_prefix = 'kl';
+elseif strcmp(method, 'wasserstein')
+    method_prefix = 'w';
+else
+    error('Invalid method specified.');
+end
+
+% Construct the variable names
+var_name_MDRO = sprintf('%s_%02d_%03d_1000_MDRO', method_prefix, n_sample, formatted_alpha);
+var_name_CI = sprintf('%s_%02d_%03d_1000_CI', method_prefix, n_sample, formatted_alpha);
+
+% Assign the input MSE values to the dynamically named variables
+eval([var_name_MDRO ' = MSE_MDRO_Z;']);
+eval([var_name_CI ' = MSE_CI;']);
+
+% Save the variables to the .mat file
+save(filename, var_name_MDRO, var_name_CI, '-append');
+end
